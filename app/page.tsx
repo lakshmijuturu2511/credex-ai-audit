@@ -1,192 +1,175 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-const tools = [
-  "Cursor",
-  "GitHub Copilot",
-  "Claude",
-  "ChatGPT",
-  "Anthropic API",
-  "OpenAI API",
-  "Gemini",
-  "Windsurf",
-];
+import { useState } from "react";
 
 export default function Home() {
-  const [formData, setFormData] = useState({
-    tool: "",
-    plan: "",
-    monthlySpend: "",
-    seats: "",
-    teamSize: "",
-    useCase: "",
-  });
+  const [tool, setTool] = useState("");
+  const [plan, setPlan] = useState("");
+  const [spend, setSpend] = useState("");
+  const [seats, setSeats] = useState("");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("audit-form");
+  const [result, setResult] =
+    useState<any>(null);
 
-    if (saved) {
-      setFormData(JSON.parse(saved));
+  const generateAudit = () => {
+    let monthlySavings = 0;
+    let recommendation = "";
+
+    if (
+      tool === "ChatGPT" &&
+      plan.toLowerCase() === "team" &&
+      Number(seats) <= 2
+    ) {
+      monthlySavings = 30;
+
+      recommendation =
+        "Switch to ChatGPT Plus";
+    } else if (
+      tool === "Cursor" &&
+      Number(spend) > 60
+    ) {
+      monthlySavings = 20;
+
+      recommendation =
+        "Downgrade to Cursor Pro";
+    } else {
+      recommendation =
+        "Current setup looks optimized";
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "audit-form",
-      JSON.stringify(formData)
-    );
-  }, [formData]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    setResult({
+      currentSpend: spend,
+      monthlySavings,
+      annualSavings:
+        monthlySavings * 12,
+      recommendation,
     });
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
+    <main className="min-h-screen bg-black text-white p-10">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-5xl font-bold">
           AI Spend Audit
         </h1>
 
-        <p className="mt-4 text-gray-400">
-          Discover how much your startup can
-          save on AI tooling.
-        </p>
+        <div className="mt-10 space-y-4">
+          <select
+            value={tool}
+            onChange={(e) =>
+              setTool(e.target.value)
+            }
+            className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
+          >
+            <option value="">
+              Select Tool
+            </option>
 
-        <div className="mt-10 space-y-6">
-          <div>
-            <label className="block mb-2">
-              AI Tool
-            </label>
+            <option value="ChatGPT">
+              ChatGPT
+            </option>
 
-            <select
-              name="tool"
-              value={formData.tool}
-              onChange={handleChange}
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            >
-              <option value="">
-                Select tool
-              </option>
+            <option value="Cursor">
+              Cursor
+            </option>
+          </select>
 
-              {tools.map((tool) => (
-                <option key={tool} value={tool}>
-                  {tool}
-                </option>
-              ))}
-            </select>
-          </div>
+          <input
+            value={plan}
+            onChange={(e) =>
+              setPlan(e.target.value)
+            }
+            placeholder="Plan"
+            className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
+          />
 
-          <div>
-            <label className="block mb-2">
-              Current Plan
-            </label>
+          <input
+            value={spend}
+            onChange={(e) =>
+              setSpend(e.target.value)
+            }
+            placeholder="Monthly Spend"
+            type="number"
+            className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
+          />
 
-            <input
-              type="text"
-              name="plan"
-              value={formData.plan}
-              onChange={handleChange}
-              placeholder="Pro / Team / Enterprise"
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">
-              Monthly Spend ($)
-            </label>
-
-            <input
-              type="number"
-              name="monthlySpend"
-              value={formData.monthlySpend}
-              onChange={handleChange}
-              placeholder="100"
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">
-              Number of Seats
-            </label>
-
-            <input
-              type="number"
-              name="seats"
-              value={formData.seats}
-              onChange={handleChange}
-              placeholder="5"
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">
-              Team Size
-            </label>
-
-            <input
-              type="number"
-              name="teamSize"
-              value={formData.teamSize}
-              onChange={handleChange}
-              placeholder="10"
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">
-              Primary Use Case
-            </label>
-
-            <select
-              name="useCase"
-              value={formData.useCase}
-              onChange={handleChange}
-              className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
-            >
-              <option value="">
-                Select use case
-              </option>
-
-              <option value="coding">
-                Coding
-              </option>
-
-              <option value="writing">
-                Writing
-              </option>
-
-              <option value="research">
-                Research
-              </option>
-
-              <option value="data">
-                Data
-              </option>
-
-              <option value="mixed">
-                Mixed
-              </option>
-            </select>
-          </div>
+          <input
+            value={seats}
+            onChange={(e) =>
+              setSeats(e.target.value)
+            }
+            placeholder="Seats"
+            type="number"
+            className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
+          />
 
           <button
-            className="w-full bg-white text-black font-semibold py-3 rounded"
+            onClick={generateAudit}
+            className="bg-white text-black px-6 py-3 rounded w-full"
           >
             Generate Audit
           </button>
+
+          {result && (
+            <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-700 mt-8">
+              <h2 className="text-3xl font-bold">
+                Audit Results
+              </h2>
+
+              <div className="mt-6 space-y-4">
+                <div>
+                  <p className="text-gray-400">
+                    Current Spend
+                  </p>
+
+                  <h3 className="text-2xl font-bold">
+                    $
+                    {
+                      result.currentSpend
+                    }
+                  </h3>
+                </div>
+
+                <div>
+                  <p className="text-gray-400">
+                    Monthly Savings
+                  </p>
+
+                  <h3 className="text-2xl font-bold text-green-400">
+                    $
+                    {
+                      result.monthlySavings
+                    }
+                  </h3>
+                </div>
+
+                <div>
+                  <p className="text-gray-400">
+                    Annual Savings
+                  </p>
+
+                  <h3 className="text-2xl font-bold text-green-400">
+                    $
+                    {
+                      result.annualSavings
+                    }
+                  </h3>
+                </div>
+
+                <div>
+                  <p className="text-gray-400">
+                    Recommendation
+                  </p>
+
+                  <p>
+                    {
+                      result.recommendation
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>
