@@ -53,6 +53,11 @@ export default function Home() {
           AI Spend Audit
         </h1>
 
+        <p className="mt-4 text-gray-400">
+          Discover how much your startup can
+          save on AI tooling.
+        </p>
+
         <div className="mt-10 space-y-4">
           <select
             value={tool}
@@ -72,6 +77,14 @@ export default function Home() {
             <option value="Cursor">
               Cursor
             </option>
+
+            <option value="Claude">
+              Claude
+            </option>
+
+            <option value="Gemini">
+              Gemini
+            </option>
           </select>
 
           <input
@@ -79,7 +92,7 @@ export default function Home() {
             onChange={(e) =>
               setPlan(e.target.value)
             }
-            placeholder="Plan"
+            placeholder="Plan (Team / Pro / Enterprise)"
             className="w-full p-3 rounded bg-zinc-900 border border-zinc-700"
           />
 
@@ -105,7 +118,7 @@ export default function Home() {
 
           <button
             onClick={generateAudit}
-            className="bg-white text-black px-6 py-3 rounded w-full"
+            className="bg-white text-black px-6 py-3 rounded w-full font-semibold"
           >
             Generate Audit
           </button>
@@ -161,12 +174,36 @@ export default function Home() {
                     Recommendation
                   </p>
 
-                  <p>
+                  <p className="mt-1">
                     {
                       result.recommendation
                     }
                   </p>
                 </div>
+
+                {result.monthlySavings >
+                0 ? (
+                  <div className="mt-6 bg-green-500/20 border border-green-500 p-4 rounded-lg">
+                    <p className="font-semibold text-green-300">
+                      Potential yearly
+                      savings detected.
+                    </p>
+
+                    <p className="text-sm text-gray-300 mt-1">
+                      Credex may help
+                      reduce your AI
+                      infrastructure
+                      costs even further.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-6 bg-zinc-800 border border-zinc-700 p-4 rounded-lg">
+                    <p className="font-semibold">
+                      Your setup already
+                      looks efficient.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
