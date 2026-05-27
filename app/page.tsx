@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import { supabase } from "@/lib/supabase";
 export default function Home() {
   const [tool, setTool] = useState("");
   const [plan, setPlan] = useState("");
@@ -11,40 +11,70 @@ export default function Home() {
   const [result, setResult] =
     useState<any>(null);
 
-  const generateAudit = () => {
-    let monthlySavings = 0;
-    let recommendation = "";
+  const generateAudit = async () => {
+  let monthlySavings = 0;
+  let recommendation = "";
 
-    if (
-      tool === "ChatGPT" &&
-      plan.toLowerCase() === "team" &&
-      Number(seats) <= 2
-    ) {
-      monthlySavings = 30;
+  if (
+    tool === "ChatGPT" &&
+    plan.toLowerCase() === "team" &&
+    Number(seats) <= 2
+  ) {
+    monthlySavings = 30;
 
-      recommendation =
-        "Switch to ChatGPT Plus";
-    } else if (
-      tool === "Cursor" &&
-      Number(spend) > 60
-    ) {
-      monthlySavings = 20;
+    recommendation =
+      "Switch to ChatGPT Plus";
+  } else if (
+    tool === "Cursor" &&
+    Number(spend) > 60
+  ) {
+    monthlySavings = 20;
 
-      recommendation =
-        "Downgrade to Cursor Pro";
-    } else {
-      recommendation =
-        "Current setup looks optimized";
-    }
+    recommendation =
+      "Downgrade to Cursor Pro";
+  } else {
+    recommendation =
+      "Current setup looks optimized";
+  }
 
-    setResult({
-      currentSpend: spend,
-      monthlySavings,
-      annualSavings:
-        monthlySavings * 12,
-      recommendation,
-    });
+  const auditData = {
+    currentSpend: spend,
+    monthlySavings,
+    annualSavings:
+      monthlySavings * 12,
+    recommendation,
   };
+
+  setResult(auditData);
+
+  const { data, error } =
+    await supabase
+      .from("audits")
+      .insert([
+        {
+          tool_data: {
+            tool,
+            plan,
+            spend,
+            seats,
+          },
+
+          total_monthly_savings:
+            monthlySavings,
+
+          total_annual_savings:
+            monthlySavings * 12,
+
+          ai_summary:
+            recommendation,
+        },
+      ])
+      .select();
+
+  console.log(data);
+
+  console.log(error);
+};
 
   return (
     <main className="min-h-screen bg-black text-white p-10">
