@@ -2,79 +2,87 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+
 export default function Home() {
   const [tool, setTool] = useState("");
   const [plan, setPlan] = useState("");
   const [spend, setSpend] = useState("");
   const [seats, setSeats] = useState("");
 
+  const [auditId, setAuditId] =
+    useState("");
+
   const [result, setResult] =
     useState<any>(null);
 
   const generateAudit = async () => {
-  let monthlySavings = 0;
-  let recommendation = "";
+    let monthlySavings = 0;
+    let recommendation = "";
 
-  if (
-    tool === "ChatGPT" &&
-    plan.toLowerCase() === "team" &&
-    Number(seats) <= 2
-  ) {
-    monthlySavings = 30;
+    if (
+      tool === "ChatGPT" &&
+      plan.toLowerCase() === "team" &&
+      Number(seats) <= 2
+    ) {
+      monthlySavings = 30;
 
-    recommendation =
-      "Switch to ChatGPT Plus";
-  } else if (
-    tool === "Cursor" &&
-    Number(spend) > 60
-  ) {
-    monthlySavings = 20;
+      recommendation =
+        "Switch to ChatGPT Plus";
+    } else if (
+      tool === "Cursor" &&
+      Number(spend) > 60
+    ) {
+      monthlySavings = 20;
 
-    recommendation =
-      "Downgrade to Cursor Pro";
-  } else {
-    recommendation =
-      "Current setup looks optimized";
-  }
+      recommendation =
+        "Downgrade to Cursor Pro";
+    } else {
+      recommendation =
+        "Current setup looks optimized";
+    }
 
-  const auditData = {
-    currentSpend: spend,
-    monthlySavings,
-    annualSavings:
-      monthlySavings * 12,
-    recommendation,
-  };
+    const auditData = {
+      currentSpend: spend,
+      monthlySavings,
+      annualSavings:
+        monthlySavings * 12,
+      recommendation,
+    };
 
-  setResult(auditData);
+    setResult(auditData);
 
-  const { data, error } =
-    await supabase
-      .from("audits")
-      .insert([
-        {
-          tool_data: {
-            tool,
-            plan,
-            spend,
-            seats,
+    const { data, error } =
+      await supabase
+        .from("audits")
+        .insert([
+          {
+            tool_data: {
+              tool,
+              plan,
+              spend,
+              seats,
+            },
+
+            total_monthly_savings:
+              monthlySavings,
+
+            total_annual_savings:
+              monthlySavings * 12,
+
+            ai_summary:
+              recommendation,
           },
+        ])
+        .select()
+        .single();
 
-          total_monthly_savings:
-            monthlySavings,
+    console.log(data);
+    console.log(error);
 
-          total_annual_savings:
-            monthlySavings * 12,
-
-          ai_summary:
-            recommendation,
-        },
-      ])
-      .select();
-
-  console.log(data);
-
-  console.log(error);
-};
+    if (data) {
+      setAuditId(data.id);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-black text-white p-10">
@@ -234,6 +242,50 @@ export default function Home() {
                     </p>
                   </div>
                 )}
+
+                <div className="mt-10 border-t border-zinc-700 pt-6">
+                  <h3 className="text-2xl font-bold">
+                    Get Full Report
+                  </h3>
+
+                  <p className="text-gray-400 mt-2">
+                    Receive your audit
+                    report and future AI
+                    spend optimization
+                    insights.
+                  </p>
+
+                  <div className="mt-6 space-y-4">
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      className="w-full p-3 rounded bg-black border border-zinc-700"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Company Name (optional)"
+                      className="w-full p-3 rounded bg-black border border-zinc-700"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Role (optional)"
+                      className="w-full p-3 rounded bg-black border border-zinc-700"
+                    />
+
+                    <button
+                      onClick={() => {
+                        if (auditId) {
+                          window.location.href = `/audit/${auditId}`;
+                        }
+                      }}
+                      className="w-full bg-green-500 text-black font-semibold py-3 rounded"
+                    >
+                      Save My Report
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
