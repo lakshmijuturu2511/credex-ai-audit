@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function generateAudit(data: any) {
   return {
     currentMonthlySpend: 100,
